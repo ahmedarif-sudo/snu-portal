@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#123227"><title>بوابة الطالب</title>
+<style>
+:root{--g9:#123227;--g6:#2b5d4b;--g1:#e4eee8;--au:#c9a24b;--au0:#fbf4e2;--ink:#14201f;--mut:#5b6b69;--line:#dce3e1;--bg:#f3f6f5;--pan:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--ink)}
+.hd{background:linear-gradient(118deg,var(--g9),var(--g6));color:#fff;padding:18px 18px 22px;border-bottom:3px solid var(--au)}.hd .t{display:flex;gap:12px;align-items:center}.hd img{width:46px;height:46px;border-radius:50%;background:#fff;padding:3px}
+.hd b{font-size:17px;display:block}.hd small{color:#e7d3a0;font-size:12px}.w{max-width:720px;margin:0 auto;padding:16px}
+.c{background:var(--pan);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}h2{font-size:16px;margin:0 0 10px}
+input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:18px;letter-spacing:2px;text-align:center;direction:ltr;font-weight:700}
+button{font:inherit;font-weight:700;border:0;border-radius:12px;padding:12px 16px;background:var(--g6);color:#fff;cursor:pointer;width:100%;margin-top:10px}button.s{background:var(--g1);color:var(--ink);width:auto;margin:0}
+.err{color:#b42318;font-size:13px;min-height:18px;margin-top:8px;text-align:center}.mut{color:var(--mut);font-size:12.5px}.chk{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px;color:var(--mut)}
+.tabs{display:flex;gap:6px;overflow:auto;padding-bottom:4px;margin-bottom:12px}.tabs button{width:auto;margin:0;background:var(--pan);color:var(--mut);border:1px solid var(--line);white-space:nowrap;padding:9px 14px}.tabs button.on{background:var(--g6);color:#fff;border-color:var(--g6)}
+.it{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;background:var(--pan)}.it b{display:block}.it small{color:var(--mut)}
+.pill{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:99px;background:var(--g1);color:var(--g6)}.pill.r{background:#fde8e7;color:#8a1c12}.pill.a{background:var(--au0);color:#7d5f1a}
+.seat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.seat div{background:var(--bg);border-radius:10px;padding:8px 10px}.seat small{display:block;color:var(--mut);font-size:11px}.seat b{font-size:19px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right}th{background:var(--g6);color:#fff;font-weight:700}
+.upd{background:var(--au0);color:#7d5f1a;border-radius:10px;padding:8px 12px;font-size:12.5px;margin-bottom:12px}.f{color:var(--mut);font-size:11.5px;text-align:center;margin:20px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.top b{font-size:16px}
+</style></head><body>
+<div class="hd"><div class="t"><img id="lg" alt="" style="display:none"><div><b id="col">بوابة الطالب</b><small id="uni">جامعة سهل نينوى</small></div></div></div>
+<div class="w" id="app"></div>
+<div class="f">بوابة الطالب خارج الكلية — المعلومات مشفّرة لكل طالب برمز بطاقته<br><a href="verify.html" style="color:var(--g6)">التحقق من وثيقة رسمية</a><br>جميع الحقوق محفوظة للأستاذ احمد عارف</div>
+<script>
+const $=s=>document.querySelector(s),E=new TextEncoder(),Dc=new TextDecoder();
+const h=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=c=>(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const b64=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+const hex=a=>[...a].map(b=>b.toString(16).padStart(2,'0')).join('');
+async function derive(code,salt){const k=await crypto.subtle.importKey('raw',E.encode('ms-stu|'+norm(code)),'PBKDF2',false,['deriveBits']);const bits=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',salt:E.encode(salt),iterations:150000,hash:'SHA-256'},k,384));
+  return {key:await crypto.subtle.importKey('raw',bits.slice(0,32),'AES-GCM',false,['decrypt']),id:hex(bits.slice(32,48))}}
+async function dec(key,o){return JSON.parse(Dc.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(o.iv)},key,b64(o.data))))}
+const get=async p=>{const r=await fetch(p+'?t='+Date.now(),{cache:'no-store'});return r.ok?r.json():null};
+const fd=t=>{try{return new Date(t).toLocaleString('ar-IQ-u-nu-latn',{dateStyle:'medium',timeStyle:'short'})}catch(e){return ''}};
+const dayN=d=>{try{return new Date(d+'T12:00:00').toLocaleDateString('ar-IQ-u-nu-latn',{weekday:'long',year:'numeric',month:'numeric',day:'numeric'})}catch(e){return d}};
+let META=null,RES=null,INF=null,TAB='ex';
+async function boot(){META=await get('meta.json').catch(()=>null);if(META){$('#col').textContent=META.college||'بوابة الطالب';$('#uni').textContent=META.univ||'';if(META.logo){$('#lg').src=META.logo;$('#lg').style.display=''}}
+  let saved='';try{saved=localStorage.getItem('stuCode')||''}catch(e){}if(saved)return open(saved,true);login()}
+function login(msg){$('#app').innerHTML='<div class="c"><h2>دخول الطالب</h2><p class="mut">اكتب رمز الدخول المطبوع على بطاقتك (12 حرفاً ورقماً). الرمز نفسه لنتيجتك ولامتحاناتك وإعلاناتك.</p><input id="cd" placeholder="XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters"><label class="chk"><input type="checkbox" id="rm" style="width:auto"> تذكّر الرمز على هذا الجهاز</label><button id="go">دخول</button><div class="err" id="er">'+h(msg||'')+'</div></div>';
+  $('#go').onclick=()=>{const c=norm($('#cd').value);if(c.length!==12)return $('#er').textContent='الرمز 12 حرفاً ورقماً (بالإنجليزية)';open(c,false,$('#rm').checked)};$('#cd').onkeydown=e=>{if(e.key==='Enter')$('#go').click()};$('#cd').focus()}
+async function open(code,auto,remember){$('#app').innerHTML='<div class="c" style="text-align:center">جارٍ فتح معلوماتك…</div>';
+  try{const [r,i]=await Promise.all([derive(code,'ms-portal-v1'),derive(code,'ms-home-v1')]);
+    const [rr,ii]=await Promise.all([get('r/'+r.id+'.json'),get('i/'+i.id+'.json')]);
+    if(!rr&&!ii){try{if(auto)localStorage.removeItem('stuCode')}catch(e){}return login('الرمز غير صحيح، أو لم تُنشر معلوماتك بعد. تأكد من مطابقة الرمز للبطاقة.')}
+    RES=rr?await dec(r.key,rr):null;RES&&(RES._at=rr.at);INF=ii?await dec(i.key,ii):null;if(remember)try{localStorage.setItem('stuCode',code)}catch(e){}
+    TAB=INF&&INF.exams&&INF.exams.length?'ex':RES?'res':'ann';show()}catch(e){login('الرمز غير صحيح')}}
+function show(){const nm=(INF&&INF.name)||(RES&&RES.name)||'',sub=INF?[INF.dept,INF.stage&&'المرحلة '+INF.stage].filter(Boolean).join(' — '):RES?(RES.dept+' — المرحلة '+RES.stage):'';
+  const tabs=[['ex','امتحاناتي',INF&&INF.exams],['res','نتيجتي',RES],['ann','الإعلانات',INF&&INF.ann],['asg','الواجبات',INF&&INF.asg],['cal','التقويم',INF&&INF.cal]].filter(t=>t[2]);
+  const up=Math.max((INF&&INF.at)||0,(META&&META.at)||0);
+  $('#app').innerHTML='<div class="top"><div><b>'+h(nm)+'</b><div class="mut">'+h(sub)+'</div></div><button class="s" id="out">خروج</button></div><div class="upd">آخر تحديث للمعلومات: '+h(fd(up))+'. للاطلاع فقط؛ التسليم والمعاملات من داخل الكلية.</div><div class="tabs">'+tabs.map(t=>'<button class="'+(TAB===t[0]?'on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>').join('')+'</div><div id="pane"></div>';
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{TAB=b.dataset.t;show()});$('#out').onclick=()=>{try{localStorage.removeItem('stuCode')}catch(e){}RES=INF=null;login()};pane()}
+function pane(){const P=$('#pane');
+  if(TAB==='ex'){const L=INF.exams||[];P.innerHTML=L.length?L.map(x=>'<div class="it"><b>'+h(x.subj)+'</b><small>'+h(dayN(x.date))+' — من '+h(x.from)+' إلى '+h(x.to)+' — الدور '+(x.round===2?'الثاني':'الأول')+'</small><div class="seat"><div><small>القاعة</small><b>'+h(x.hall||'—')+'</b></div><div><small>رقم المقعد</small><b>'+h(String(x.seat||'—'))+'</b></div></div>'+(x.note?'<small>'+h(x.note)+'</small>':'')+'</div>').join(''):'<div class="c mut">لم يُنشر جدول امتحاناتك بعد</div>'}
+  else if(TAB==='res'){const p=RES;P.innerHTML='<div class="c"><h2>'+h(p.year||'')+'</h2>'+(p.courses||[]).map(c=>'<h3 style="font-size:14px;margin:12px 0 6px">'+h(c.title)+'</h3><table><thead><tr><th>المادة</th><th>التقدير</th></tr></thead><tbody>'+c.subs.map(s=>'<tr><td>'+h(s.n)+'</td><td><b>'+h(s.g||'—')+'</b>'+(s.l?' ('+h(s.l)+')':'')+'</td></tr>').join('')+'</tbody></table><p class="mut">النتيجة: <b>'+h(c.status||'—')+'</b>'+(c.general?' — التقدير العام: <b>'+h(c.general)+'</b>':'')+'</p>').join('')+(p.annual||[]).map(a=>'<p><span class="pill">'+h(a.title)+'</span> <b>'+h(a.res)+'</b>'+(a.word?' — '+h(a.word):'')+'</p>').join('')+'<p class="mut">التقديرات فقط، بلا درجات. '+(p._at?'نُشرت: '+h(fd(p._at)):'')+'</p></div>'}
+  else if(TAB==='ann'){const L=INF.ann||[];P.innerHTML=L.length?L.map(a=>'<div class="it"><span class="pill a">'+h(a.src)+'</span><b style="margin-top:6px">'+h(a.title)+'</b>'+(a.text?'<div style="white-space:pre-wrap;margin-top:6px;font-size:14px">'+h(a.text)+'</div>':'')+'<small>'+h(fd(a.at))+'</small></div>').join(''):'<div class="c mut">لا إعلانات</div>'}
+  else if(TAB==='asg'){const L=INF.asg||[];P.innerHTML=L.length?L.map(x=>{const late=x.due&&Date.parse(x.due)<Date.now();return '<div class="it"><b>'+h(x.title)+'</b><small>'+h(x.subj)+' — الدرجة من '+h(x.max)+(x.due?' — التسليم حتى '+h(x.due.replace('T',' ')):'')+'</small><div style="margin-top:6px">'+(x.graded?'<span class="pill">صُحّح</span>':x.done?'<span class="pill">سلّمته'+(x.late?' (متأخراً)':'')+'</span>':x.closed?'<span class="pill r">أُغلق التسليم</span>':late?'<span class="pill r">انتهى الموعد</span>':'<span class="pill a">بانتظار التسليم من داخل الكلية</span>')+'</div></div>'}).join(''):'<div class="c mut">لا واجبات</div>'}
+  else if(TAB==='cal'){const L=INF.cal||[];P.innerHTML=L.length?L.map(e=>'<div class="it"><b>'+h(e.title)+'</b><small>'+h(e.from)+(e.to?' ← '+h(e.to):'')+(e.note?' — '+h(e.note):'')+'</small></div>').join(''):'<div class="c mut">لا مواعيد قادمة</div>'}}
+boot();
+</script></body></html>
